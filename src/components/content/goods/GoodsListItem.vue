@@ -1,6 +1,6 @@
 <template>
-  <div class="goods-item">
-      <img :src="goodsItem.show.img" alt="" @load="imageLoad">
+  <div class="goods-item" @click="itemClick">
+      <img :src="showImage" alt="" @load="imageLoad">
       <div class="goods-info">
           <p>{{goodsItem.title}}</p>
           <span class="price">{{goodsItem.price}}</span>
@@ -22,7 +22,21 @@ export default {
     },
     methods:{
         imageLoad(){
-            this.$bus.$emit('itemImageLoad')
+            //因为首页的goods和详情页的goods是用同一个组件所以这种方式判断当前激活路由
+            //通过判断当前激活路由中的路径来发送Load方法
+            if(this.$route.path.indexOf('/home')!==-1){
+                this.$bus.$emit('itemImageLoad')
+            }else if(this.$route.path.indexOf('/detail')!==-1){
+                this.$bus.$emit('detailRecommendsImageLoad')
+            }
+        },
+        itemClick(){
+            this.$router.push('/detail/'+this.goodsItem.iid)
+        }
+    },
+    computed:{
+        showImage(){
+            return this.goodsItem.image || this.goodsItem.show.img
         }
     }
 }
