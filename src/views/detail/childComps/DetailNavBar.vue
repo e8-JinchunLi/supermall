@@ -36,8 +36,9 @@ export default {
             this.$router.back()
         },
         itemClick(index){
-            console.log(this.currentIndex)
+            // console.log(this.currentIndex)
             this.currentIndex=index
+            this.$emit('detailNavClick',index)
         }
     }
 }

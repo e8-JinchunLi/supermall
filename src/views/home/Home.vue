@@ -13,7 +13,7 @@
       <tab-control :titles="['流行','新款','精选']" class="tab-control" @tabClick="tabClick" ref="tabControl2"/>
       <goods-list :goods="showGoods"></goods-list>
     </scroll>
-    <back-top @click.native="backTopClick" v-show="isShowBackTop" />
+    <back-top @click.native="backTop" v-show="isShowBackTop" />
   </div>
 </template>
 
@@ -32,6 +32,9 @@
   import {getHomeMultidata,getHomeGoods} from '@/network/home'
   import {debounce} from '@/common/utils'
 
+  import {backTopMixin} from '@/common/mixin'
+
+
   export default {
     name: "Home",
     data(){
@@ -44,12 +47,12 @@
           'sell':{page:0,list:[] },          
         },
         currentType:'pop',
-        isShowBackTop:false,
         tabOffsetTop:0,
         isTabFixed:false,
         saveY:0
       }
     },
+    mixins:[backTopMixin],
     components:{
       NavBar,
       HomeSwiper,
@@ -119,9 +122,6 @@
         this.$refs.tabControl1.currentIndex=index
         this.$refs.tabControl2.currentIndex=index
       } ,
-      backTopClick(){
-        this.$refs.scroll.scrollTo(0,0)
-      },
       scroll(position){
         //backTop是否显示
         this.isShowBackTop = (-position.y)>1000

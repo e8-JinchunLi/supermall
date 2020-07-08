@@ -1,15 +1,18 @@
 <template>
   <div id="detail">
-      <detail-nav-bar class="detail-nav"></detail-nav-bar>
-        <scroll class="detail-scroll" ref="scroll">
+      <detail-nav-bar class="detail-nav" @detailNavClick="detailNavClick" ref="detailNav"></detail-nav-bar>
+        <scroll class="detail-scroll" ref="scroll" @scroll="detailScroll" :probeType="3">
+ 
             <detail-swiper :topImages="topImages" />
-            <detail-base-info :goods="goods"></detail-base-info>
-            <detail-shop-info :shop="shop" ></detail-shop-info>
-            <detail-goods-info :detail-info="detailInfo"  />
-            <detail-param-info :paramInfo="paramInfo"  />
-            <detail-comment-info :comment-info="commentInfo" />
-            <detail-recommends :goods="recommends" />
+            <detail-base-info :goods="goods" ></detail-base-info>
+            <detail-shop-info :shop="shop"></detail-shop-info>
+            <detail-goods-info :detail-info="detailInfo" @goodsInfoLoad="goodsInfoLoad" />
+            <detail-param-info :paramInfo="paramInfo" ref="paramsInfo" />
+            <detail-comment-info :comment-info="commentInfo" ref="commentInfo" />
+            <detail-recommends :goods="recommends" ref="recommends"/>
         </scroll>
+        <back-top @click.native="backTop" v-show="isShowBackTop" />
+        <detail-bottom-bar @addCart="addCart" />
   </div>
 </template>
 
@@ -23,6 +26,8 @@ import DetailGoodsInfo from './childComps/DetailGoodsInfo'
 import DetailParamInfo from './childComps/DetailParamInfo'
 import DetailCommentInfo from './childComps/DetailCommentInfo'
 import DetailRecommends from '@/components/content/goods/GoodsList'
+import DetailBottomBar from './childComps/DetailBottomBar'
+import BackTop from '@/components/content/backTop/BackTop'
 
 import Scroll from '@/components/common/scrool/Scrool'
 
@@ -30,6 +35,8 @@ import Scroll from '@/components/common/scrool/Scrool'
 import {getDetail,getRecommend,Goods,Shop,GoodsParam} from '@/network/detail'
 import {debounce} from '@/common/utils'
 
+//混入backTop
+import {backTopMixin} from "@/common/mixin"
 export default {
     name:'Detail',
     data(){
@@ -41,9 +48,13 @@ export default {
             detailInfo:{},
             paramInfo:{},
             commentInfo:{},
-            recommends:[]
+            recommends:[],
+            themeTops:[],
+            getThemeTopYs:null,
+            currentIndex:0
         }
     },
+    mixins:[backTopMixin],
     components:{
         DetailNavBar,
         DetailSwiper,
@@ -53,7 +64,9 @@ export default {
         DetailGoodsInfo,
         DetailParamInfo,
         DetailCommentInfo,
-        DetailRecommends
+        DetailRecommends,
+        DetailBottomBar,
+        BackTop
     },
     created(){
         this.iid=this.$route.params.iid
@@ -80,9 +93,11 @@ export default {
             }
         })
         getRecommend().then(res => {
-            console.log(res)
             this.recommends = res.data.list
         })
+    },
+    updated(){
+        this.getOffsetTops()
     },
     mounted(){
         //使用防抖函数对商品的相信信息进行处理
@@ -96,9 +111,52 @@ export default {
         })
     },
     methods:{
-        // imageLoad(){
-        //     this.$refs.scroll.refresh()
-        // }
+        goodsInfoLoad(){
+            this.getThemeTopYs()
+        },
+        detailNavClick(index){
+            this.$refs.scroll.scrollTo(0,-(this.themeTops[index]-44),100)
+        },
+        detailScroll(position){
+            // console.log(position)
+            const positionY = -position.y
+
+            //循环比较长度，若在区间中则将index更改
+            for(let i =0;i<this.themeTops.length;i++){
+                if(this.currentIndex !== i && (positionY >= this.themeTops[i] && positionY < this.themeTops[i+1])){
+                    this.currentIndex = i
+                    // console.log(this.currentIndex)
+                    this.$refs.detailNav.currentIndex = this.currentIndex
+                }
+            }
+            //用swich重构一下 应该效率更高一点
+
+
+            //利用滚动显示backTop
+            this.isShowBackTop = positionY > 1000 
+
+        },
+        getOffsetTops(){
+            this.getThemeTopYs = debounce(()=>{
+                this.themeTops =[]
+                this.themeTops.push(0)
+                this.themeTops.push(this.$refs.paramsInfo.$el.offsetTop)
+                this.themeTops.push(this.$refs.commentInfo.$el.offsetTop)
+                this.themeTops.push(this.$refs.recommends.$el.offsetTop)
+                this.themeTops.push(Number.MAX_VALUE)
+            },0)
+        },
+        //
+        addCart(){
+            const obj = {}
+
+            obj.iid =this.iid
+            obj.imgURL = this.topImages[0]
+            obj.title = this.goods.title
+            obj.desc = this.goods.desc
+            obj.realPrice = this.goods.realPrice
+            this.$store.commit('addCart',obj)
+        }
     }
 }
 </script>

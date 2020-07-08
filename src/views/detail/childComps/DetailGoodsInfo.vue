@@ -36,6 +36,8 @@ export default {
             // if (++this.counter === this.imagesLength) {
             // this.$emit('imageLoad');
             // }
+            this.$emit('goodsInfoLoad')
+
             this.$bus.$emit('goodsInfoLoad')
         }
     },
