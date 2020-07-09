@@ -13,6 +13,7 @@
         </scroll>
         <back-top @click.native="backTop" v-show="isShowBackTop" />
         <detail-bottom-bar @addCart="addCart" />
+        <toast :message="message" :isShow="show" />
   </div>
 </template>
 
@@ -30,6 +31,7 @@ import DetailBottomBar from './childComps/DetailBottomBar'
 import BackTop from '@/components/content/backTop/BackTop'
 
 import Scroll from '@/components/common/scrool/Scrool'
+import Toast from '@/components/common/toast/Toast'
 
 //网络请求
 import {getDetail,getRecommend,Goods,Shop,GoodsParam} from '@/network/detail'
@@ -51,7 +53,9 @@ export default {
             recommends:[],
             themeTops:[],
             getThemeTopYs:null,
-            currentIndex:0
+            currentIndex:0,
+            message:'',
+            show: false
         }
     },
     mixins:[backTopMixin],
@@ -66,7 +70,8 @@ export default {
         DetailCommentInfo,
         DetailRecommends,
         DetailBottomBar,
-        BackTop
+        BackTop,
+        Toast
     },
     created(){
         this.iid=this.$route.params.iid
@@ -155,7 +160,16 @@ export default {
             obj.title = this.goods.title
             obj.desc = this.goods.desc
             obj.realPrice = this.goods.realPrice
-            this.$store.commit('addCart',obj)
+            // this.$store.commit('addCart',obj) 
+            this.$store.dispatch('addCart',obj).then(res =>{
+                this.show =true
+                this.message = res
+
+                setTimeout(() => {
+                    this.show = false
+                    this.message = ''
+                },1500)
+            })
         }
     }
 }

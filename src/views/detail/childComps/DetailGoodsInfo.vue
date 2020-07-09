@@ -37,7 +37,6 @@ export default {
             // this.$emit('imageLoad');
             // }
             this.$emit('goodsInfoLoad')
-
             this.$bus.$emit('goodsInfoLoad')
         }
     },

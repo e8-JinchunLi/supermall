@@ -1,7 +1,7 @@
 <template>
 <div class="bootom-menu">
     <div class="select-all">
-        <check-button :isCheck="isSelectAll" />
+        <check-button :isCheck="isSelectAll" @click.native="cartBottomAllClick" />
         <span>全选</span>
     </div>
     <span class="total-price">合计：{{totalPrice}}</span>
@@ -18,6 +18,7 @@ export default {
     components:{
         CheckButton
     },
+
     computed:{
         //通过mapGetters方法将Getter中的方法映射到computed中
         ...mapGetters(['cartList']),
@@ -29,18 +30,23 @@ export default {
             },0).toFixed(2)
         },
         checkLength() {
-            return this.cartList.filter(item => item.checked).length
+            return this.cartList.filter(item => item.checked===true).length
         },
         isSelectAll(){
+
+
             // console.log(this.cartList)
             if(this.cartList.length === 0) return false
-            return this.cartList.every(item => {
-                return item.checked
-            })
+            // this.isSelect=this.cartList.every(item => item.checked !==  false)
+            // return this.isSelect
+            return !this.cartList.find(item => !item.checked)
         }
     },
     methods:{
+        cartBottomAllClick(){
 
+            this.$store.commit('cartBottomAll',this.isSelectAll)
+        }
     }
 }
 </script>

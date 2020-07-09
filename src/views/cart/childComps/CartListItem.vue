@@ -1,10 +1,10 @@
 <template>
   <div id="cart-item">
       <div class="item-selector">
-          <check-button @checkBtnClick="checkChange" :isCheck='itemInfo.checked'></check-button>
+          <check-button  :isCheck='itemInfo.checked' :index="itemInfo.index"></check-button>
       </div>
       <div class="item-img">
-          <img :src="itemInfo.imgURL" alt="">
+          <img :src="itemInfo.imgURL" alt="" @load="cartImgLoad">
       </div>
       <div class="item-info">
           <div class="item-title">{{itemInfo.title}}</div>
@@ -34,8 +34,12 @@ export default {
         CheckButton
     },
     methods:{
-        checkChange(){
-            this.$store.commit('checkedChange',this.itemInfo.index)
+        // checkChange(){
+        //     this.$store.commit('checkedChange',this.itemInfo.index)
+        // }
+        cartImgLoad(){
+            // console.log('+++++++')
+            this.$bus.$emit("cartImagLoad")
         }
     }
 

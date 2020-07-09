@@ -9,14 +9,16 @@ export default {
     name:'CheckButton',
     methods:{
         selectItem(){
-            this.$emit('checkBtnClick')
-            // this.$store.commit('checkedChange') 
+            this.$store.commit('checkedChange',this.index)
         }
     },
     props:{
         isCheck:{
             type:Boolean,
             default:false
+        },
+        index:{
+            type:Number
         }
     },
 }
